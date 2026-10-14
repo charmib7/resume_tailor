@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LaTeX Resume Tailor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,500;0,600;1,500&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <div class="brand">
+        <h1>Resume <em>Tailor</em></h1>
+        <p class="sub">Pick the right experiences for each job, reword them toward the posting, and get back a complete <span class="tex">L<sup>a</sup>T<sub>e</sub>X</span> file.</p>
+      </div>
+      <button id="settingsBtn" class="btn ghost" aria-expanded="false" aria-controls="settings">API settings</button>
+    </div>
+  </header>
+
+  <section id="settings" class="wrap settings" hidden>
+    <div class="settings-grid">
+      <label class="field">
+        <span class="label">Anthropic API key</span>
+        <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…">
+      </label>
+      <label class="field">
+        <span class="label">Model</span>
+        <select id="model">
+          <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (recommended)</option>
+          <option value="claude-opus-5-5">Claude Opus 5.5 (best, slower)</option>
+          <option value="claude-haiku-5-5">Claude Haiku 5.5 (fastest)</option>
+        </select>
+      </label>
+      <label class="check">
+        <input id="rememberKey" type="checkbox">
+        <span>Remember key on this device</span>
+      </label>
+    </div>
+    <p class="hint">Your key goes straight from this browser to api.anthropic.com and is never sent anywhere else. Without "remember", it is cleared when you close the tab. Get a key at console.anthropic.com.</p>
+  </section>
+
+  <main class="wrap grid">
+    <!-- INPUTS -->
+    <section class="panel" aria-labelledby="inTitle">
+      <div class="panel-head">
+        <h2 id="inTitle">Inputs</h2>
+        <div class="head-actions">
+          <button id="loadExample" class="btn link">Load example</button>
+          <button id="clearAll" class="btn link">Clear</button>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" data-group="in">
+        <button role="tab" class="tab" aria-selected="true" data-tab="job">Job posting</button>
+        <button role="tab" class="tab" aria-selected="false" data-tab="exp">Experience bank</button>
+        <button role="tab" class="tab" aria-selected="false" data-tab="tpl">LaTeX template</button>
+      </div>
+
+      <div class="tabpane" data-pane="job">
+        <p class="hint">Paste the full posting. Requirements and "nice to haves" matter most.</p>
+        <textarea id="job" spellcheck="true" rows="18"></textarea>
+      </div>
+      <div class="tabpane" data-pane="exp" hidden>
+        <p class="hint">Everything you could list: jobs, research, projects, leadership. One <code>##</code> heading per entry, then bullets. Extra detail helps; it won't all be used.</p>
+        <textarea id="exp" spellcheck="true" rows="18"></textarea>
+      </div>
+      <div class="tabpane" data-pane="tpl" hidden>
+        <p class="hint">Your base resume. Its preamble, header, education and formatting are kept; experience, projects and skills get rewritten.</p>
+        <textarea id="tpl" class="mono" spellcheck="false" rows="18"></textarea>
+      </div>
+
+      <div class="controls">
+        <label class="field small">
+          <span class="label">Max entries</span>
+          <input id="maxEntries" type="number" min="1" max="10" value="4">
+        </label>
+        <label class="field small">
+          <span class="label">Bullets each</span>
+          <input id="maxBullets" type="number" min="1" max="6" value="3">
+        </label>
+        <label class="field small">
+          <span class="label">Rewording</span>
+          <select id="strength">
+            <option value="light">Light</option>
+            <option value="moderate" selected>Moderate</option>
+            <option value="strong">Strong</option>
+          </select>
+        </label>
+        <label class="check">
+          <input id="onePage" type="checkbox" checked>
+          <span>Keep to one page</span>
+        </label>
+      </div>
+
+      <div class="run">
+        <button id="runBtn" class="btn primary">Tailor resume</button>
+        <button id="stopBtn" class="btn ghost" hidden>Stop</button>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- OUTPUT -->
+    <section class="panel" aria-labelledby="outTitle">
+      <div class="panel-head">
+        <h2 id="outTitle">Output</h2>
+        <span id="exampleBadge" class="badge" hidden>Example output</span>
+      </div>
+
+      <div class="tabs" role="tablist" data-group="out">
+        <button role="tab" class="tab" aria-selected="true" data-tab="picks">Selection</button>
+        <button role="tab" class="tab" aria-selected="false" data-tab="latex">LaTeX</button>
+      </div>
+
+      <div class="tabpane" data-pane="picks">
+        <div id="picks" class="picks"></div>
+      </div>
+
+      <div class="tabpane" data-pane="latex" hidden>
+        <div class="out-actions">
+          <button id="copyBtn" class="btn">Copy</button>
+          <button id="downloadBtn" class="btn">Download .tex</button>
+          <button id="overleafBtn" class="btn">Open in Overleaf</button>
+          <span id="copyNote" class="status"></span>
+        </div>
+        <textarea id="latex" class="mono" spellcheck="false" rows="28" aria-label="Generated LaTeX"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Tailoring only rephrases what's in your experience bank. Always read the result before sending it.</p>
+  </footer>
+
+  <!-- Overleaf accepts a POSTed snippet and opens it as a new project -->
+  <form id="overleafForm" action="https://www.overleaf.com/docs" method="post" target="_blank" hidden>
+    <input type="hidden" name="encoded_snip" id="overleafSnip">
+    <input type="hidden" name="snip_name" value="resume.tex">
+  </form>
+
+  <script src="examples.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
